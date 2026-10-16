@@ -26,7 +26,8 @@ self.addEventListener("fetch", e => {
 self.addEventListener("push", e => {
   let data = {};
   try { data = e.data ? e.data.json() : {}; } catch { data = { title: "Stock alarm", body: e.data && e.data.text() }; }
-  const isAlarm = data.type === "alarm";
+  // Test alarms behave exactly like real ones, so you can check what an alarm feels like.
+  const isAlarm = data.type === "alarm" || data.type === "test";
   e.waitUntil((async () => {
     if (isAlarm) {
       const cache = await caches.open(ALARM_CACHE);
@@ -34,10 +35,10 @@ self.addEventListener("push", e => {
     }
     await self.registration.showNotification(data.title || "Stock alarm", {
       body: data.body || "",
-      tag: isAlarm ? "stock-alarm" : "stock-test",
+      tag: "stock-alarm",
       renotify: true,
       requireInteraction: isAlarm,          // stays until you dismiss it
-      vibrate: isAlarm ? [800, 300, 800, 300, 800, 300, 1500] : [300],
+      vibrate: [1000, 300, 1000, 300, 1000, 300, 1000, 300, 2000],
       icon: "icon-192.png",
       badge: "badge-96.png",
       timestamp: data.at ? Date.parse(data.at) : Date.now(),

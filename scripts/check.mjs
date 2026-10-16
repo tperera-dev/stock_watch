@@ -9,6 +9,7 @@
 //   WATCHLIST          JSON: [{"symbol":"AMD","below":540,"above":650,"on":true}, ...]
 //   PUSH_SUBSCRIPTION  JSON push subscription saved by the phone app
 //   VAPID_PUBLIC_KEY   variable, VAPID_PRIVATE_KEY secret, VAPID_SUBJECT url
+//   FINNHUB_API_KEY    optional secret: extra price source for US stocks
 //   FORCE=true         check every ticker even if its market is closed
 //   TEST_ALERT=true    send a test alarm
 // Local testing: MOCK_PRICES='{"AMD":530}' NOW=2026-10-16T15:00:00Z DRY_RUN=true
@@ -64,51 +65,134 @@ export function parseWatchlist(raw) {
 }
 
 // ---------- price sources ----------
-async function fromYahoo(sym) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`;
-  const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } });
-  if (res.status === 404) throw Object.assign(new Error("ticker not found"), { notFound: true });
+// Order: Yahoo batch quote (one request for every ticker, with Yahoo's cookie
+// + crumb, which avoids most "429 Too Many Requests" blocks), then per ticker:
+// Yahoo chart, CNBC, Finnhub (US only, if FINNHUB_API_KEY is set), Google.
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const num = v => { const n = Number(String(v ?? "").replace(/[,$A]/g, "")); return n > 0 ? n : null; };
+const notFound = msg => Object.assign(new Error(msg || "ticker not found"), { notFound: true });
+
+// Yahoo session: a cookie from fc.yahoo.com plus a crumb, like a real browser.
+let yahooSession = null;
+async function getYahooSession() {
+  if (yahooSession) return yahooSession;
+  const r1 = await fetch("https://fc.yahoo.com/", { headers: { "User-Agent": UA }, redirect: "manual" }).catch(() => null);
+  const setCookies = r1?.headers?.getSetCookie ? r1.headers.getSetCookie() : [];
+  const cookie = setCookies.map(c => c.split(";")[0]).join("; ");
+  if (!cookie) throw new Error("Yahoo: no session cookie");
+  for (const host of ["query1", "query2"]) {
+    const r2 = await fetch(`https://${host}.finance.yahoo.com/v1/test/getcrumb`, { headers: { "User-Agent": UA, Cookie: cookie } });
+    const crumb = r2.ok ? (await r2.text()).trim() : "";
+    if (crumb && !crumb.includes("<") && crumb.length < 40) return (yahooSession = { cookie, crumb });
+    if (r2.status === 429) await sleep(1500);
+  }
+  throw new Error("Yahoo: couldn't get a session");
+}
+async function yahooFetch(path) {
+  let s = null;
+  try { s = await getYahooSession(); } catch {}
+  const sep = path.includes("?") ? "&" : "?";
+  let last;
+  for (const host of ["query1", "query2"]) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const url = `https://${host}.finance.yahoo.com${path}${s ? `${sep}crumb=${encodeURIComponent(s.crumb)}` : ""}`;
+      const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json", ...(s ? { Cookie: s.cookie } : {}) } });
+      if (res.status !== 429 && res.status < 500) return res;
+      last = res.status; await sleep(1500 + Math.random() * 1500);
+    }
+  }
+  throw new Error(`Yahoo HTTP ${last}`);
+}
+const STALE_MS = 18 * 3600e3; // no trade for 18 h during market hours = holiday
+function fromYahooQuoteRow(q) {
+  const price = num(q.regularMarketPrice);
+  if (!price) return null;
+  const t = q.regularMarketTime ? q.regularMarketTime * 1000 : null;
+  return {
+    price, source: "Yahoo Finance", currency: q.currency || null,
+    prevClose: num(q.regularMarketPreviousClose),
+    quoteTime: t ? new Date(t).toISOString() : null,
+    openBySource: t ? now.getTime() - t < STALE_MS : null,
+  };
+}
+const prefetched = new Map();
+async function prefetchYahoo(symbols) {
+  if (!symbols.length) return;
+  try {
+    const res = await yahooFetch(`/v7/finance/quote?symbols=${symbols.map(encodeURIComponent).join(",")}`);
+    if (!res.ok) throw new Error(`Yahoo HTTP ${res.status}`);
+    const rows = (await res.json())?.quoteResponse?.result || [];
+    for (const q of rows) { const v = fromYahooQuoteRow(q); if (v) prefetched.set(String(q.symbol).toUpperCase(), v); }
+    console.log(`Yahoo batch: ${prefetched.size} of ${symbols.length} prices.`);
+  } catch (e) { console.log("Yahoo batch failed:", e.message); }
+}
+async function fromYahooChart(sym) {
+  const res = await yahooFetch(`/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`);
+  if (res.status === 404) throw notFound();
   if (!res.ok) throw new Error(`Yahoo HTTP ${res.status}`);
   const json = await res.json();
-  if (json?.chart?.error) throw Object.assign(new Error(json.chart.error.description || "ticker not found"), { notFound: true });
+  if (json?.chart?.error) throw notFound(json.chart.error.description);
   const meta = json?.chart?.result?.[0]?.meta;
-  const price = Number(meta?.regularMarketPrice);
-  if (!(price > 0)) throw new Error("Yahoo: no price");
-  const period = meta.currentTradingPeriod?.regular;
-  const t = Math.floor(now.getTime() / 1000);
-  return {
-    price, source: "Yahoo Finance",
-    currency: meta.currency || null,
-    prevClose: Number(meta.chartPreviousClose ?? meta.previousClose) || null,
-    quoteTime: meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : null,
-    openBySource: period ? t >= period.start && t <= period.end + 600 : null, // knows holidays
-  };
+  const price = num(meta?.regularMarketPrice);
+  if (!price) throw new Error("Yahoo: no price");
+  const t = meta.regularMarketTime ? meta.regularMarketTime * 1000 : null;
+  return { price, source: "Yahoo Finance", currency: meta.currency || null,
+    prevClose: num(meta.previousClose ?? meta.chartPreviousClose),
+    quoteTime: t ? new Date(t).toISOString() : null, openBySource: t ? now.getTime() - t < STALE_MS : null };
+}
+async function fromCnbc(sym) {
+  const cs = marketOf(sym) === "ASX" ? `${baseSymbol(sym)}-AU` : sym; // CNBC writes BHP.AX as BHP-AU
+  const url = `https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${encodeURIComponent(cs)}&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json`;
+  const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } });
+  if (!res.ok) throw new Error(`CNBC HTTP ${res.status}`);
+  const q = [].concat((await res.json())?.FormattedQuoteResult?.FormattedQuote || [])[0];
+  const price = num(q?.last);
+  if (!price) throw new Error("CNBC: no price");
+  return { price, source: "CNBC", currency: q.currencyCode || MARKETS[marketOf(sym)].currency,
+    prevClose: num(q.previous_day_closing), quoteTime: null, openBySource: null };
+}
+async function fromFinnhub(sym) {
+  if (!env.FINNHUB_API_KEY || marketOf(sym) !== "US") throw new Error("Finnhub: not configured");
+  const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(sym)}&token=${encodeURIComponent(env.FINNHUB_API_KEY)}`);
+  if (!res.ok) throw new Error(`Finnhub HTTP ${res.status}`);
+  const q = await res.json();
+  if (!num(q.c)) throw new Error("Finnhub: no price");
+  const t = q.t ? q.t * 1000 : null;
+  return { price: num(q.c), source: "Finnhub", currency: "USD", prevClose: num(q.pc),
+    quoteTime: t ? new Date(t).toISOString() : null, openBySource: t ? now.getTime() - t < STALE_MS : null };
 }
 async function fromGoogle(sym) {
   const market = marketOf(sym);
+  let lastStatus = null;
   for (const ex of MARKETS[market].google) {
-    const res = await fetch(`https://www.google.com/finance/quote/${encodeURIComponent(baseSymbol(sym))}:${ex}?hl=en`,
-      { headers: { "User-Agent": UA, "Accept-Language": "en-US" } });
+    const res = await fetch(`https://www.google.com/finance/quote/${encodeURIComponent(baseSymbol(sym))}:${ex}?hl=en&gl=us`,
+      { headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9", Cookie: "CONSENT=YES+cb; SOCS=CAI" } });
+    lastStatus = res.status;
     if (!res.ok) continue;
     const html = await res.text();
-    const m = html.match(/data-last-price="([\d.]+)"/);
-    if (m && Number(m[1]) > 0) {
+    const m = html.match(/data-last-price="([\d.]+)"/) || html.match(/<title>[^<]*?\$([\d,]+\.\d+)/);
+    if (m && num(m[1])) {
       const pc = html.match(/Previous close<\/div>[\s\S]{0,200}?([\d,]+\.\d+)/);
-      return { price: Number(m[1]), source: "Google Finance", currency: MARKETS[market].currency,
-        prevClose: pc ? Number(pc[1].replace(/,/g, "")) : null, quoteTime: null, openBySource: null };
+      return { price: num(m[1]), source: "Google Finance", currency: MARKETS[market].currency,
+        prevClose: pc ? num(pc[1]) : null, quoteTime: null, openBySource: null };
     }
   }
-  throw new Error("Google: price not found");
+  throw new Error(lastStatus && lastStatus !== 200 ? `Google HTTP ${lastStatus}` : "Google: price not found");
 }
 const MOCK = env.MOCK_PRICES ? JSON.parse(env.MOCK_PRICES) : null;
 async function getQuote(sym) {
   if (MOCK) {
-    if (!(sym in MOCK)) throw Object.assign(new Error("ticker not found"), { notFound: true });
+    if (!(sym in MOCK)) throw notFound();
     return { price: Number(MOCK[sym]), source: "mock", currency: MARKETS[marketOf(sym)].currency, prevClose: null, quoteTime: null, openBySource: null };
   }
+  if (prefetched.has(sym)) return prefetched.get(sym);
   const errors = [];
-  try { return await fromYahoo(sym); } catch (e) { errors.push(e.message); if (e.notFound) { try { return await fromGoogle(sym); } catch {} throw e; } }
-  try { return await fromGoogle(sym); } catch (e) { errors.push(e.message); }
+  let yahooSaysMissing = false;
+  for (const src of [fromYahooChart, fromCnbc, fromFinnhub, fromGoogle]) {
+    try { return await src(sym); }
+    catch (e) { if (e.notFound) yahooSaysMissing = true; if (!/not configured/.test(e.message)) errors.push(e.message); }
+  }
+  if (yahooSaysMissing) throw notFound();
   throw new Error(errors.join("; "));
 }
 
@@ -194,6 +278,7 @@ async function main() {
   for (const w of watchlist) if (prevTickers[w.symbol]) tickers[w.symbol] = prevTickers[w.symbol]; // drop removed tickers
   const fired = [];
 
+  if (!MOCK) await prefetchYahoo(due.map(w => w.symbol));
   for (const w of due) {
     const prev = prevTickers[w.symbol] || { history: [] };
     try {

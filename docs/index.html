@@ -444,12 +444,12 @@ async function startSound(){
   else $("soundBtn").hidden = false;
 }
 function showAlarm(data){
-  if (!data || data.type !== "alarm") return;
+  if (!data || (data.type !== "alarm" && data.type !== "test")) return;
   if (store.get("sw-alarm-dismissed") === data.at) return;
   const ul = $("alarmList"); ul.innerHTML = "";
   (data.items || []).forEach(f => { const li = document.createElement("li"); li.textContent = `${f.symbol} ${money(f.price, f.currency)} — ${f.side} ${money(f.level, f.currency)}`; ul.append(li); });
   if (!ul.children.length) { const li = document.createElement("li"); li.textContent = data.body || ""; ul.append(li); }
-  $("alarmTitle").textContent = (data.items || []).length > 1 ? `${data.items.length} price alarms` : "Price alarm";
+  $("alarmTitle").textContent = data.type === "test" ? "Test alarm" : (data.items || []).length > 1 ? `${data.items.length} price alarms` : "Price alarm";
   $("alarm").dataset.at = data.at || "";
   $("alarm").hidden = false; startSound();
 }
@@ -466,7 +466,7 @@ async function lastAlarm(){
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
   navigator.serviceWorker.addEventListener("message", async e => {
-    if (e.data?.kind === "push") { if (e.data.data?.type === "alarm") showAlarm(e.data.data); loadStatus().then(render); }
+    if (e.data?.kind === "push") { showAlarm(e.data.data); loadStatus().then(render); }
     if (e.data?.kind === "open-alarm") showAlarm(await lastAlarm());
   });
 }
