@@ -208,9 +208,26 @@ async function setSecret(name, value){
   const p = await gh(`/actions/secrets/${name}`, { method: "PUT", body: JSON.stringify({ encrypted_value: b64(enc), key_id }) });
   if (!p.ok) throw new Error(`GitHub error ${p.status} saving ${name}`);
 }
+// Finds the alarm workflow whatever its file is called (price-alarm.yml, price_alarm.yml, …).
+let workflowId = null;
+async function findWorkflow(){
+  if (workflowId) return workflowId;
+  const r = await gh(`/actions/workflows?per_page=100`);
+  if (r.status === 404) throw new Error(`GitHub can't see the repository ${repo()} with this token. Make sure the token's repository access includes it.`);
+  if (!r.ok) throw new Error(`GitHub error ${r.status} listing workflows`);
+  const list = (await r.json()).workflows || [];
+  const wf = list.find(w => w.name === "Stock price alarm")
+    || list.find(w => /price[-_ ]?alarm/i.test(w.path))
+    || list.find(w => w.path.endsWith("/" + WORKFLOW));
+  if (!wf) throw new Error("Couldn't find the alarm workflow. Make sure price-alarm.yml is in .github/workflows on the main branch.");
+  if (wf.state !== "active") throw new Error("The alarm workflow is turned off. Open the Actions tab on GitHub and enable it.");
+  return (workflowId = wf.id);
+}
 async function runWorkflow(inputs){
-  const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs }) });
-  if (r.status === 404) throw new Error("Couldn't find the workflow. Make sure .github/workflows/price-alarm.yml is in the repo.");
+  const id = await findWorkflow();
+  const r = await gh(`/actions/workflows/${id}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs }) });
+  if (r.status === 404) { workflowId = null; throw new Error("Couldn't start the alarm workflow. Make sure it's on the main branch."); }
+  if (r.status === 422) throw new Error("GitHub rejected the request. Make sure the workflow file in the repo is the latest version.");
   if (!r.ok) throw new Error(`GitHub error ${r.status} starting the check`);
 }
 
