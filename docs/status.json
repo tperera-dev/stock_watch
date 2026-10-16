@@ -1,6 +1,24 @@
 {
-  "updatedAt": "2026-10-16T13:03:58.410Z",
+  "updatedAt": "2026-10-16T13:05:54.726Z",
   "pushError": null,
-  "tickers": {},
-  "state": "bvnS/Q2UnJWieB52sz1u/Wwp9NEgj1aGv6Bm470X"
+  "tickers": {
+    "AMD": {
+      "price": 562.23,
+      "currency": "USD",
+      "prevClose": 570.82,
+      "changePct": -1.5,
+      "market": "US",
+      "source": "Yahoo Finance",
+      "quoteTime": "2026-10-15T20:00:01.000Z",
+      "checkedAt": "2026-10-16T13:05:54.726Z",
+      "error": null,
+      "history": [
+        {
+          "t": "2026-10-16T13:05:54.726Z",
+          "p": 562.23
+        }
+      ]
+    }
+  },
+  "state": "a49F9XbMJpZSXt6X1MIjcOL6clOu7miWabPCxcc0JrGLFrVhPNE42hhf8NNZHQOZ76pCW00ErmslcxNhztTkas5enZD+x2iKxFqJBMyT3kvZ94HJ+Q2m//j7urhX/W3xLidg"
 }
