@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-16T13:09:06.481Z",
+  "updatedAt": "2026-10-16T17:01:48.417Z",
   "pushError": null,
   "tickers": {
     "AMD": {
@@ -10,8 +10,8 @@
       "market": "US",
       "source": "Yahoo Finance",
       "quoteTime": "2026-10-15T20:00:01.000Z",
-      "checkedAt": "2026-10-16T13:05:54.726Z",
-      "error": null,
+      "checkedAt": "2026-10-16T17:01:48.417Z",
+      "error": "Couldn't get a price: Yahoo HTTP 429; Google: price not found",
       "history": [
         {
           "t": "2026-10-16T13:05:54.726Z",
@@ -20,5 +20,5 @@
       ]
     }
   },
-  "state": "8CD4CtKozh/rIPIHSuNgkL50cB1GFOqV+x+swupcNWsXIV9bruYOaG5CxQJsP1bkIpRWmWcOnkmUwRpY/aUhngRd9mIKYU9Eqyvp1bKyRN5+gEA+66rkBbkMdVsujzu9W0BR"
+  "state": "sYJJ8CPUTAU2FRxwpHLvKVwad5xptPTbqtkmhpVLIez7nZMGb7dbxDv0KWmc4iLMMu8aWWiARh+xpkPekeq9YYHSTDTUo/XDZH6uwCkCyidYKmMMjMoz5HmQZb9WkK1qs5Ep"
 }
