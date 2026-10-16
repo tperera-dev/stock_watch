@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stock Watch</title>
+<meta name="theme-color" content="#0f1720">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<style>
+/* Phone-first: a stacked watchlist of ticker cards, dialogs as bottom sheets. */
+:root{
+  --bg:#0f1720; --panel:#17222d; --panel2:#1e2b37; --fg:#e6edf2; --muted:#8fa0ad; --line:#2a3946;
+  --accent:#3cc1b8; --accent-ink:#04201e; --up:#4cc985; --down:#ff6b5e; --warn:#f2b84b;
+  --alarm:#ff4a3d; --alarm-bg:#3b1512;
+  --mono:ui-monospace,"Roboto Mono","SF Mono",Menlo,monospace; --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#eef2f4; --panel:#fff; --panel2:#f4f7f9; --fg:#13202b; --muted:#5a6b78; --line:#d6dee4;
+  --accent:#0b6e6e; --accent-ink:#fff; --up:#1a7f4b; --down:#c0392b; --warn:#a36a00;
+  --alarm:#d62d20; --alarm-bg:#fde8e6; color-scheme:light}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+body{padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-.01em}
+.sub{font-size:12px;color:var(--muted);font-family:var(--mono)}
+button,.btn{font:inherit;font-weight:700;font-size:14px;border-radius:10px;padding:11px 14px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.danger{color:var(--down);border-color:var(--down);background:transparent}
+button.icon{padding:9px 11px}
+button:disabled{opacity:.5}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.notice{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.45}
+.notice.err{border-left-color:var(--down)}
+.notice .row{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;cursor:pointer;text-align:left;width:100%;font-weight:400}
+.card.alert{border-color:var(--alarm);background:linear-gradient(0deg,var(--alarm-bg),var(--alarm-bg)) padding-box}
+.card.off{opacity:.55}
+.sym{font-weight:800;font-size:17px;display:flex;align-items:center;gap:8px}
+.mkt{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.px{font-family:var(--mono);font-size:22px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.chg{font-family:var(--mono);font-size:13px;text-align:right}
+.up{color:var(--up)} .down{color:var(--down)}
+.levels{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.state{grid-column:1/-1;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.state.alarm{color:var(--alarm)} .state.err{color:var(--down)} .state.ok{color:var(--accent)}
+.card svg{grid-column:1/-1;width:100%;height:44px;margin-top:6px}
+.cerr{grid-column:1/-1;font-size:12.5px;color:var(--down)}
+.empty{text-align:center;color:var(--muted);padding:32px 12px;border:1px dashed var(--line);border-radius:12px;font-size:14px;line-height:1.5}
+.dock{position:fixed;left:0;right:0;bottom:0;padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.dock .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px}
+.foot{font-size:12px;color:var(--muted);line-height:1.5;text-align:center}
+dialog{border:0;padding:0;background:transparent;color:var(--fg);width:100%;max-width:560px;margin:auto auto 0;max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.sheet{background:var(--panel);border-radius:16px 16px 0 0;padding:18px max(16px,env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:14px;border:1px solid var(--line)}
+.sheet h2{margin:0;font-size:18px}
+label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=number],input[type=password]{font:inherit;font-family:var(--mono);font-size:17px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);width:100%;text-transform:none;letter-spacing:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle{flex-direction:row;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:15px;color:var(--fg);font-weight:600}
+.toggle input{width:22px;height:22px;accent-color:var(--accent)}
+.actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
+.hint a{color:var(--accent)}
+.msg{font-size:13px;min-height:1.2em}
+.msg.err{color:var(--down)} .msg.ok{color:var(--accent)}
+#alarm{position:fixed;inset:0;z-index:50;background:var(--alarm);color:#fff;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:max(24px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
+#alarm h2{font-size:30px;margin:0}
+#alarm ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+#alarm li{font-family:var(--mono);font-size:19px;background:rgba(0,0,0,.18);border-radius:10px;padding:12px 14px}
+#alarm button{background:#fff;color:#b3170d;border:0;font-size:18px;padding:16px}
+#alarm .soundBtn{background:transparent;color:#fff;border:2px solid #fff}
+@media (prefers-reduced-motion:no-preference){#alarm{animation:flash 1.2s steps(1) infinite}}
+@keyframes flash{50%{background:#b3170d}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>Stock Watch</h1><div id="updated" class="sub">Loading…</div></div>
+    <button id="openSettings" class="icon" aria-label="Settings">⚙︎ Settings</button>
+  </header>
+
+  <div id="notices"></div>
+  <div id="list" class="wrap" style="gap:10px"></div>
+  <p class="foot">Checked every 30 minutes while each market is open: US 9:30 am–4:00 pm New York, ASX 10 am–4 pm Sydney. Quotes can be delayed. Not financial advice.</p>
+</div>
+
+<div class="dock"><div class="in">
+  <button id="checkNow">Check now</button>
+  <button id="testAlarm">Test alarm</button>
+  <button id="addBtn" class="primary">+ Add ticker</button>
+</div></div>
+
+<!-- Add / edit ticker -->
+<dialog id="editDlg"><form class="sheet" id="editForm" method="dialog">
+  <h2 id="editTitle">Add ticker</h2>
+  <label>Ticker<input id="fSym" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="AMD or BHP.AX" required></label>
+  <p class="hint">US stocks: the normal ticker (AMD, NVDA). Australian stocks: add .AX (BHP.AX, CBA.AX).</p>
+  <div class="two">
+    <label>Alarm below<input id="fBelow" type="number" step="0.01" min="0" inputmode="decimal" placeholder="optional"></label>
+    <label>Alarm above<input id="fAbove" type="number" step="0.01" min="0" inputmode="decimal" placeholder="optional"></label>
+  </div>
+  <label class="toggle"><input id="fOn" type="checkbox" checked> Watching (uncheck to pause)</label>
+  <div id="editMsg" class="msg"></div>
+  <div class="actions">
+    <button type="button" id="delBtn" class="danger" hidden>Remove</button>
+    <span style="flex:1"></span>
+    <button type="button" id="cancelEdit">Cancel</button>
+    <button type="submit" id="saveEdit" class="primary">Save</button>
+  </div>
+</form></dialog>
+
+<!-- Settings -->
+<dialog id="setDlg"><form class="sheet" id="setForm" method="dialog">
+  <h2>Settings</h2>
+  <label>GitHub repository<input id="sRepo" type="text" autocomplete="off" spellcheck="false" placeholder="owner/repo"></label>
+  <label>GitHub access token<input id="sToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+  <p class="hint">Create a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a> for this repository only, with <b>Variables</b>, <b>Secrets</b> and <b>Actions</b> set to <i>Read and write</i>. Give it an expiry date. It's stored only on this phone.</p>
+  <div class="actions"><button type="button" id="forget" class="danger">Remove token</button><span style="flex:1"></span><button type="submit" id="saveSet" class="primary">Save</button></div>
+  <hr style="border:0;border-top:1px solid var(--line);width:100%">
+  <h2>Alerts</h2>
+  <p class="hint" id="pushState">Checking…</p>
+  <button type="button" id="enablePush" class="primary">Enable alerts on this phone</button>
+  <p class="hint">For a louder alarm: Android Settings → Apps → Chrome (or Stock Watch) → Notifications → pick the Stock Watch site → Sound, and choose an alarm tone. Allow it to override Do Not Disturb if you want it at night.</p>
+  <div id="setMsg" class="msg"></div>
+  <div class="actions"><span style="flex:1"></span><button type="button" id="closeSet">Close</button></div>
+</form></dialog>
+
+<!-- Full-screen alarm -->
+<div id="alarm" hidden role="alertdialog" aria-labelledby="alarmTitle">
+  <h2 id="alarmTitle">Price alarm</h2>
+  <ul id="alarmList"></ul>
+  <button id="soundBtn" class="soundBtn" hidden>Play alarm sound</button>
+  <button id="stopAlarm">Stop alarm</button>
+</div>
+
+<script src="vendor/nacl-fast.min.js"></script>
+<script src="vendor/blake2b.min.js"></script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k,v){ try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} },
+};
+const WORKFLOW = "price-alarm.yml";
+let watchlist = null;          // from GitHub variable (needs token)
+let status = { tickers: {} };  // public status.json
+let pendingSince = null;       // after "Check now"
+let banner = null;             // last error to show at the top
+
+// ---------- repo + token ----------
+function defaultRepo(){
+  if (location.hostname.endsWith(".github.io")) {
+    const owner = location.hostname.split(".")[0];
+    const repo = location.pathname.split("/").filter(Boolean)[0];
+    if (repo) return `${owner}/${repo}`;
+  }
+  return "";
+}
+const repo = () => store.get("sw-repo") || defaultRepo();
+const token = () => store.get("sw-token");
+
+async function gh(path, opts = {}){
+  if (!token()) throw new Error("Add your GitHub token in Settings first.");
+  const res = await fetch(`https://api.github.com/repos/${repo()}${path}`, {
+    ...opts,
+    headers: { Authorization: `Bearer ${token()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? {"Content-Type":"application/json"} : {}) },
+  });
+  if (res.status === 401) throw new Error("GitHub didn't accept the token. It may have expired. Create a new one in Settings.");
+  if (res.status === 403) throw new Error("The token is missing a permission. It needs Variables, Secrets and Actions set to Read and write.");
+  return res;
+}
+async function getVar(name){
+  const r = await gh(`/actions/variables/${name}`);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`GitHub error ${r.status} reading ${name}`);
+  return (await r.json()).value;
+}
+async function setVar(name, value){
+  let r = await gh(`/actions/variables/${name}`, { method: "PATCH", body: JSON.stringify({ name, value }) });
+  if (r.status === 404) r = await gh(`/actions/variables`, { method: "POST", body: JSON.stringify({ name, value }) });
+  if (!r.ok) throw new Error(`GitHub error ${r.status} saving ${name}`);
+}
+// GitHub secrets must be encrypted with the repo's public key (libsodium sealed box).
+function sealedBox(msg, pk){
+  const e = nacl.box.keyPair();
+  const n = new Uint8Array(64); n.set(e.publicKey); n.set(pk, 32);
+  const nonce = blake2b(n, null, 24);
+  const c = nacl.box(msg, nonce, pk, e.secretKey);
+  const out = new Uint8Array(32 + c.length); out.set(e.publicKey); out.set(c, 32);
+  return out;
+}
+const b64 = u8 => btoa(String.fromCharCode(...u8));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64url = u8 => b64(u8).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64url = s => unb64(s.replace(/-/g,"+").replace(/_/g,"/") + "===".slice((s.length + 3) % 4));
+async function setSecret(name, value){
+  const r = await gh(`/actions/secrets/public-key`);
+  if (!r.ok) throw new Error(`GitHub error ${r.status} reading the secrets key`);
+  const { key, key_id } = await r.json();
+  const enc = sealedBox(new TextEncoder().encode(value), unb64(key));
+  const p = await gh(`/actions/secrets/${name}`, { method: "PUT", body: JSON.stringify({ encrypted_value: b64(enc), key_id }) });
+  if (!p.ok) throw new Error(`GitHub error ${p.status} saving ${name}`);
+}
+async function runWorkflow(inputs){
+  const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs }) });
+  if (r.status === 404) throw new Error("Couldn't find the workflow. Make sure .github/workflows/price-alarm.yml is in the repo.");
+  if (!r.ok) throw new Error(`GitHub error ${r.status} starting the check`);
+}
+
+// ---------- data ----------
+async function loadStatus(){
+  try { const r = await fetch("status.json?t=" + Date.now(), { cache: "no-store" }); if (r.ok) status = await r.json(); } catch {}
+}
+async function loadWatchlist(){
+  if (!token() || !repo()) { watchlist = null; return; }
+  try { const v = await getVar("WATCHLIST"); watchlist = v ? JSON.parse(v) : []; store.set("sw-wl-cache", JSON.stringify(watchlist)); banner = null; }
+  catch (e) { const c = store.get("sw-wl-cache"); watchlist = c ? JSON.parse(c) : null; banner = e.message; }
+}
+async function saveWatchlist(list){
+  await setVar("WATCHLIST", JSON.stringify(list));
+  watchlist = list; store.set("sw-wl-cache", JSON.stringify(list));
+}
+
+// ---------- render ----------
+const money = (n, cur) => n == null ? "—" : (cur === "AUD" ? "A$" : "$") + Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const curOf = sym => /\.AX$/i.test(sym) ? "AUD" : "USD";
+function ago(iso){ if(!iso) return "never"; const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m/60)} h ago` : new Date(iso).toLocaleDateString(); }
+let noticeEls = [];
+function notice(html, err, buttons = []){
+  const d = document.createElement("div"); d.className = "notice" + (err ? " err" : "");
+  const p = document.createElement("div"); p.textContent = html; d.append(p);
+  if (buttons.length){ const row = document.createElement("div"); row.className = "row"; buttons.forEach(([t, fn, cls]) => { const b = document.createElement("button"); b.textContent = t; if (cls) b.className = cls; b.onclick = fn; row.append(b); }); d.append(row); }
+  $("notices").append(d); noticeEls.push(d);
+}
+function spark(hist, levels, cur){
+  const pts = (hist || []).slice(-40).map(h => h.p);
+  if (pts.length < 2) return "";
+  const vals = pts.concat(levels.filter(v => v != null));
+  let lo = Math.min(...vals), hi = Math.max(...vals); if (hi - lo < 0.01 * hi) { hi *= 1.005; lo *= 0.995; }
+  const y = v => 3 + (hi - v) / (hi - lo) * 38, x = i => i / (pts.length - 1) * 296 + 2;
+  const d = pts.map((p,i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p).toFixed(1)}`).join("");
+  const lines = levels.map(v => v == null ? "" : `<line x1="0" x2="300" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--alarm)" stroke-dasharray="4 4" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join("");
+  return `<svg viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">${lines}<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${x(pts.length-1)}" cy="${y(pts[pts.length-1])}" r="3" fill="var(--accent)"/></svg>`;
+}
+function render(){
+  noticeEls.forEach(n => n.remove()); noticeEls = [];
+  $("updated").textContent = pendingSince ? "Check running… results in about 2 min" : `Last check ${ago(status.updatedAt)}`;
+  if (!repo()) notice("Open this app from your GitHub Pages address, or set the repository in Settings.", true, [["Open settings", openSettings]]);
+  else if (!token()) notice("Connect your GitHub token to add tickers and set alarm prices. Until then you'll only see the latest prices.", false, [["Open settings", openSettings, "primary"]]);
+  if (banner) notice(banner, true);
+  if (status.pushError) notice(status.pushError, true, [["Enable alerts", openSettings]]);
+  else if (token() && "Notification" in window && Notification.permission !== "granted") notice("Alerts aren't turned on for this phone yet.", false, [["Enable alerts", openSettings, "primary"]]);
+
+  const list = $("list"); list.innerHTML = "";
+  const items = watchlist ?? Object.keys(status.tickers || {}).map(symbol => ({ symbol, on: true }));
+  if (!items.length){ const e = document.createElement("div"); e.className = "empty"; e.textContent = token() ? "No tickers yet. Tap + Add ticker to start watching one." : "No prices yet."; list.append(e); return; }
+  const rows = items.map((w, i) => {
+    const t = (status.tickers || {})[w.symbol] || {};
+    const cur = t.currency || curOf(w.symbol);
+    const below = w.below != null && t.price != null && t.price < w.below;
+    const above = w.above != null && t.price != null && t.price > w.above;
+    return { w, i, t, cur, hit: below || above, below, above };
+  });
+  rows.sort((a, b) => (b.hit - a.hit) || (a.i - b.i)); // tickers in alarm go to the top
+  for (const r of rows){
+    const { w, t, cur } = r;
+    const b = document.createElement("button"); b.type = "button";
+    b.className = "card" + (r.hit && w.on !== false ? " alert" : "") + (w.on === false ? " off" : "");
+    const pct = t.changePct;
+    let gap = "";
+    if (t.price != null && watchlist){
+      const parts = [];
+      if (w.below != null) parts.push(`below ${money(w.below, cur)}` + (t.price >= w.below ? ` (${((t.price - w.below) / t.price * 100).toFixed(1)}% away)` : ""));
+      if (w.above != null) parts.push(`above ${money(w.above, cur)}` + (t.price <= w.above ? ` (${((w.above - t.price) / t.price * 100).toFixed(1)}% away)` : ""));
+      gap = parts.length ? "Alarm " + parts.join(" · ") : "No alarm price set";
+    } else if (watchlist) gap = [w.below != null ? `Alarm below ${money(w.below, cur)}` : "", w.above != null ? `above ${money(w.above, cur)}` : ""].filter(Boolean).join(" · ") || "No alarm price set";
+    const state = w.on === false ? ["Paused", ""] : t.error ? ["Error", "err"] : r.below ? ["Below alarm", "alarm"] : r.above ? ["Above alarm", "alarm"] : t.price != null ? [`Checked ${ago(t.checkedAt)}`, "ok"] : ["Waiting for first check", ""];
+    b.innerHTML = `<div class="sym"></div><div class="px"></div><div class="levels"></div><div class="chg"></div><div class="state"></div>${spark(t.history, watchlist ? [w.below, w.above] : [], cur)}`;
+    const sym = b.querySelector(".sym"); sym.textContent = w.symbol; const m = document.createElement("span"); m.className = "mkt"; m.textContent = /\.AX$/i.test(w.symbol) ? "ASX" : "US"; sym.append(m);
+    b.querySelector(".px").textContent = money(t.price, cur);
+    const c = b.querySelector(".chg"); if (pct != null){ c.textContent = (pct > 0 ? "+" : "") + pct.toFixed(2) + "%"; c.classList.add(pct < 0 ? "down" : "up"); }
+    b.querySelector(".levels").textContent = gap;
+    const s = b.querySelector(".state"); s.textContent = state[0]; if (state[1]) s.classList.add(state[1]);
+    if (t.error && w.on !== false){ const e = document.createElement("div"); e.className = "cerr"; e.textContent = t.error; b.append(e); }
+    b.onclick = () => openEdit(r.i);
+    list.append(b);
+  }
+}
+
+// ---------- add / edit ----------
+let editing = -1;
+function openEdit(i){
+  if (!token()) { openSettings(); return; }
+  if (!watchlist) { banner = "Couldn't load your watchlist from GitHub yet. Check your connection and token."; render(); return; }
+  editing = i;
+  const w = i >= 0 ? watchlist[i] : { symbol: "", on: true };
+  $("editTitle").textContent = i >= 0 ? `Edit ${w.symbol}` : "Add ticker";
+  $("fSym").value = w.symbol; $("fSym").disabled = i >= 0;
+  $("fBelow").value = w.below ?? ""; $("fAbove").value = w.above ?? "";
+  $("fOn").checked = w.on !== false;
+  $("delBtn").hidden = i < 0; $("editMsg").textContent = ""; $("editMsg").className = "msg";
+  $("editDlg").showModal();
+}
+$("addBtn").onclick = () => openEdit(-1);
+$("cancelEdit").onclick = () => $("editDlg").close();
+$("editForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const msg = $("editMsg");
+  const symbol = $("fSym").value.trim().toUpperCase();
+  const below = $("fBelow").value === "" ? null : Number($("fBelow").value);
+  const above = $("fAbove").value === "" ? null : Number($("fAbove").value);
+  if (!/^[A-Z0-9.\-^=]{1,15}$/.test(symbol)) { msg.textContent = "Enter a ticker like AMD or BHP.AX."; msg.className = "msg err"; return; }
+  if (below == null && above == null) { msg.textContent = "Set an alarm below, above, or both."; msg.className = "msg err"; return; }
+  if ((below != null && !(below > 0)) || (above != null && !(above > 0))) { msg.textContent = "Alarm prices must be above 0."; msg.className = "msg err"; return; }
+  if (below != null && above != null && below >= above) { msg.textContent = "The below price must be lower than the above price."; msg.className = "msg err"; return; }
+  const list = watchlist.slice();
+  if (editing < 0 && list.some(w => w.symbol === symbol)) { msg.textContent = `${symbol} is already on your list.`; msg.className = "msg err"; return; }
+  if (editing < 0 && list.length >= 25) { msg.textContent = "You can watch up to 25 tickers."; msg.className = "msg err"; return; }
+  const item = { symbol, ...(below != null ? { below } : {}), ...(above != null ? { above } : {}), on: $("fOn").checked };
+  if (editing < 0) list.push(item); else list[editing] = item;
+  $("saveEdit").disabled = true; msg.textContent = "Saving…"; msg.className = "msg";
+  try { await saveWatchlist(list); $("editDlg").close(); render(); toast(`Saved. Applies from the next check.`); }
+  catch (e) { msg.textContent = e.message; msg.className = "msg err"; }
+  finally { $("saveEdit").disabled = false; }
+});
+let confirmDel = false;
+$("delBtn").onclick = async () => {
+  if (!confirmDel) { confirmDel = true; $("delBtn").textContent = "Tap again to remove"; setTimeout(() => { confirmDel = false; $("delBtn").textContent = "Remove"; }, 3000); return; }
+  confirmDel = false; $("delBtn").textContent = "Remove";
+  const list = watchlist.filter((_, i) => i !== editing);
+  try { await saveWatchlist(list); $("editDlg").close(); render(); toast("Removed."); }
+  catch (e) { $("editMsg").textContent = e.message; $("editMsg").className = "msg err"; }
+};
+
+// ---------- settings + alerts ----------
+async function pushStateText(){
+  const el = $("pushState");
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) { el.textContent = "This browser can't receive push alerts. Use Chrome on Android."; return; }
+  const reg = await navigator.serviceWorker.getRegistration();
+  const sub = reg && await reg.pushManager.getSubscription();
+  el.textContent = Notification.permission === "denied" ? "Notifications are blocked for this app. Allow them in Android settings, then tap Enable alerts."
+    : sub ? "Alerts are on for this phone. Tap below to re-register if alerts stop arriving." : "Alerts are off for this phone.";
+}
+function openSettings(){ $("sRepo").value = repo(); $("sToken").value = token() || ""; $("setMsg").textContent = ""; pushStateText(); $("setDlg").showModal(); }
+$("openSettings").onclick = openSettings;
+$("closeSet").onclick = () => $("setDlg").close();
+$("setForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const r = $("sRepo").value.trim().replace(/^https:\/\/github\.com\//, "").replace(/\/$/, "");
+  if (r && !/^[\w.-]+\/[\w.-]+$/.test(r)) { setMsg("Repository should look like owner/repo.", true); return; }
+  store.set("sw-repo", r && r !== defaultRepo() ? r : null);
+  store.set("sw-token", $("sToken").value.trim() || null);
+  setMsg("Checking…");
+  await loadWatchlist();
+  if (token() && watchlist) setMsg("Connected to GitHub.", false, true);
+  render();
+});
+$("forget").onclick = () => { store.set("sw-token", null); store.set("sw-wl-cache", null); $("sToken").value = ""; watchlist = null; setMsg("Token removed from this phone."); render(); };
+function setMsg(t, err, ok){ const m = $("setMsg"); m.textContent = t; m.className = "msg" + (err ? " err" : ok ? " ok" : ""); }
+
+$("enablePush").onclick = async () => {
+  const btn = $("enablePush"); btn.disabled = true;
+  try {
+    if (!token()) throw new Error("Save your GitHub token first.");
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) throw new Error("This browser can't receive push alerts. Use Chrome on Android.");
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") throw new Error("Notifications weren't allowed. Allow them for this app in Android settings, then try again.");
+    setMsg("Setting up push keys…");
+    let pub = await getVar("VAPID_PUBLIC_KEY");
+    if (!pub) {
+      // First time: create the key pair that signs alerts. The private half goes into a GitHub secret.
+      const k = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+      pub = b64url(new Uint8Array(await crypto.subtle.exportKey("raw", k.publicKey)));
+      const priv = (await crypto.subtle.exportKey("jwk", k.privateKey)).d;
+      await setSecret("VAPID_PRIVATE_KEY", priv);
+      await setVar("VAPID_PUBLIC_KEY", pub);
+    }
+    setMsg("Registering this phone…");
+    const reg = await navigator.serviceWorker.register("sw.js");
+    await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (sub) { const k = sub.options && sub.options.applicationServerKey; if (k && b64url(new Uint8Array(k)) !== pub) { await sub.unsubscribe(); sub = null; } }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: unb64url(pub) });
+    await setVar("PUSH_SUBSCRIPTION", JSON.stringify(sub.toJSON()));
+    setMsg("Alerts are on. Tap Test alarm to try one.", false, true);
+    pushStateText(); render();
+  } catch (e) { setMsg(e.message, true); }
+  finally { btn.disabled = false; }
+};
+
+// ---------- run checks from the phone ----------
+let toastTimer;
+function toast(t){ $("updated").textContent = t; clearTimeout(toastTimer); toastTimer = setTimeout(render, 4000); }
+async function dispatch(inputs, label){
+  try { await runWorkflow(inputs); banner = null; pendingSince = status.updatedAt || "none"; toast(label); pollForUpdate(); }
+  catch (e) { banner = e.message; render(); }
+}
+$("checkNow").onclick = () => token() ? dispatch({ force: "true", test_alert: "false" }, "Check started. Results in about 2 minutes.") : openSettings();
+$("testAlarm").onclick = () => token() ? dispatch({ force: "false", test_alert: "true" }, "Test alarm sent. It should arrive in about a minute.") : openSettings();
+let pollTimer;
+function pollForUpdate(){
+  clearInterval(pollTimer); let n = 0;
+  pollTimer = setInterval(async () => {
+    n++; await loadStatus();
+    if ((status.updatedAt || "none") !== pendingSince || n > 12) { clearInterval(pollTimer); pendingSince = null; render(); }
+  }, 20000);
+}
+
+// ---------- full-screen alarm ----------
+let audioCtx = null, ringTimer = null;
+function beep(){
+  if (!audioCtx) return; const t = audioCtx.currentTime;
+  [0, .22, .44].forEach(o => { const os = audioCtx.createOscillator(), g = audioCtx.createGain(); os.type = "square"; os.frequency.value = 960;
+    g.gain.setValueAtTime(.0001, t+o); g.gain.exponentialRampToValueAtTime(.35, t+o+.02); g.gain.exponentialRampToValueAtTime(.0001, t+o+.17);
+    os.connect(g).connect(audioCtx.destination); os.start(t+o); os.stop(t+o+.2); });
+}
+async function startSound(){
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); await audioCtx.resume(); } catch {}
+  if (audioCtx && audioCtx.state === "running") { $("soundBtn").hidden = true; beep(); clearInterval(ringTimer); ringTimer = setInterval(() => { beep(); try { navigator.vibrate && navigator.vibrate([600, 200, 600]); } catch {} }, 1600); }
+  else $("soundBtn").hidden = false;
+}
+function showAlarm(data){
+  if (!data || data.type !== "alarm") return;
+  if (store.get("sw-alarm-dismissed") === data.at) return;
+  const ul = $("alarmList"); ul.innerHTML = "";
+  (data.items || []).forEach(f => { const li = document.createElement("li"); li.textContent = `${f.symbol} ${money(f.price, f.currency)} — ${f.side} ${money(f.level, f.currency)}`; ul.append(li); });
+  if (!ul.children.length) { const li = document.createElement("li"); li.textContent = data.body || ""; ul.append(li); }
+  $("alarmTitle").textContent = (data.items || []).length > 1 ? `${data.items.length} price alarms` : "Price alarm";
+  $("alarm").dataset.at = data.at || "";
+  $("alarm").hidden = false; startSound();
+}
+$("soundBtn").onclick = startSound;
+$("stopAlarm").onclick = () => {
+  clearInterval(ringTimer); ringTimer = null; $("alarm").hidden = true;
+  store.set("sw-alarm-dismissed", $("alarm").dataset.at || "");
+  if (location.search.includes("alarm=1")) history.replaceState(null, "", location.pathname);
+};
+async function lastAlarm(){
+  try { const c = await caches.open("stock-watch-alarm"); const r = await c.match("./last-alarm.json"); if (!r) return null;
+    const d = await r.json(); return d && d.at && Date.now() - Date.parse(d.at) < 6 * 3600e3 ? d : null; } catch { return null; }
+}
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+  navigator.serviceWorker.addEventListener("message", async e => {
+    if (e.data?.kind === "push") { if (e.data.data?.type === "alarm") showAlarm(e.data.data); loadStatus().then(render); }
+    if (e.data?.kind === "open-alarm") showAlarm(await lastAlarm());
+  });
+}
+
+// ---------- start ----------
+(async () => {
+  const c = store.get("sw-wl-cache"); if (token() && c) { try { watchlist = JSON.parse(c); } catch {} }
+  await loadStatus(); render();
+  await loadWatchlist(); render();
+  if (location.search.includes("alarm=1")) showAlarm(await lastAlarm());
+})();
+setInterval(() => { if (!document.hidden) loadStatus().then(render); }, 5 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { loadStatus().then(render); } });
+</script>
+</body>
+</html>

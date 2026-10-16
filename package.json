@@ -1,0 +1,8 @@
+{
+  "name": "stock-watch",
+  "private": true,
+  "type": "module",
+  "description": "Server side of the stock price alarm: checks prices and sends Web Push alerts.",
+  "scripts": { "check": "node scripts/check.mjs" },
+  "dependencies": { "web-push": "3.6.7" }
+}

@@ -1,0 +1,64 @@
+name: Stock price alarm
+
+on:
+  schedule:
+    # Every 30 min on weekdays. GitHub cron is in UTC, so these windows are
+    # wide enough for both summer and winter time; the script itself only
+    # checks tickers whose market is open right now.
+    - cron: "*/30 13-21 * * 1-5"   # US market (9:30 am–4:00 pm New York)
+    - cron: "*/30 23 * * 0-4"      # ASX (10:00 am–4:00 pm Sydney), first hour
+    - cron: "*/30 0-6 * * 1-5"     # ASX, rest of the day
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Check every ticker even if its market is closed"
+        type: boolean
+        default: false
+      test_alert:
+        description: "Send a test alarm to your phone"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: price-alarm
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install (exact versions from package-lock.json)
+        run: npm ci --no-audit --no-fund
+
+      - name: Check prices
+        env:
+          WATCHLIST: ${{ vars.WATCHLIST }}
+          PUSH_SUBSCRIPTION: ${{ vars.PUSH_SUBSCRIPTION }}
+          VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          FORCE: ${{ inputs.force }}
+          TEST_ALERT: ${{ inputs.test_alert }}
+        run: node scripts/check.mjs
+
+      - name: Save status
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain docs/status.json)" ]; then
+            git config user.name "price-alarm-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add docs/status.json
+            git commit -m "Update price status" -q
+            git pull --rebase -q || true
+            git push -q
+          fi
