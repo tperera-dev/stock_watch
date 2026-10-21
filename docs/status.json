@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-10-20T17:36:45.430Z",
-  "pushError": null,
+  "updatedAt": "2026-10-21T17:43:53.392Z",
+  "pushError": "Your phone's alert registration expired. Open the app and tap Enable alerts again.",
   "tickers": {
     "AMD": {
-      "price": 540.7,
+      "price": 553.67,
       "currency": "USD",
-      "prevClose": 605.53,
-      "changePct": -10.71,
+      "prevClose": 534.74,
+      "changePct": 3.54,
       "market": "US",
-      "source": "Yahoo Finance",
-      "quoteTime": "2026-10-20T17:36:46.000Z",
-      "checkedAt": "2026-10-20T17:36:45.430Z",
+      "source": "CNBC",
+      "quoteTime": null,
+      "checkedAt": "2026-10-21T17:43:53.392Z",
       "error": null,
       "history": [
         {
@@ -32,18 +32,22 @@
         {
           "t": "2026-10-20T17:36:45.430Z",
           "p": 540.7
+        },
+        {
+          "t": "2026-10-21T17:43:53.392Z",
+          "p": 553.67
         }
       ]
     },
     "VOO": {
-      "price": 707.36,
+      "price": 711.47,
       "currency": "USD",
-      "prevClose": 704.6,
-      "changePct": 0.39,
+      "prevClose": 706.8,
+      "changePct": 0.66,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-10-20T17:36:45.430Z",
+      "checkedAt": "2026-10-21T17:43:53.392Z",
       "error": null,
       "history": [
         {
@@ -57,9 +61,13 @@
         {
           "t": "2026-10-20T17:36:45.430Z",
           "p": 707.36
+        },
+        {
+          "t": "2026-10-21T17:43:53.392Z",
+          "p": 711.47
         }
       ]
     }
   },
-  "state": "VCsAkhEcl6dzV5OMMUPC7MgfMFEtslgS5Ubt5cXLSo1mprr8By00auxmizHow60C8WCnGRSfK2WAvQ3clRjx1ZuqqSbfk2kr1BNwGpZ5RBRCUvx3PhnxYSCpDS2SWgCT+8SIRGwUDN9f9rfvcAr8Tf5Oa7Zqdub3sDMEhDj8X8Eobj+CdCp5dXgfiSE4+5+/dIIFpPzgyvhMxi98CnCqxNvebRiub+AD4A=="
+  "state": "FvygGRxQst0sKPtZQEnXG3Se8dfhDDRgGh90i4w84dwSi6+zZJTJBRlu7ieA4VNRPcyitgcHs3aAlIZ0p74huBGlAv+NliByU35PyGSKiJMtRsW363ZHjbkEYH4s/kqEpekqBErohFuigRyOYomw2p+W+iVyqHh3KxO7Jx+yhKIO81PETxsdFxvFaxS9kmQDcYsGhbjCUOHRTlkmiNIw8h7W4PfYoo2E"
 }
