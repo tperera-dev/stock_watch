@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-10-27T18:27:43.882Z",
-  "pushError": "Your phone's alert registration expired. Open the app and tap Enable alerts again.",
+  "updatedAt": "2026-10-28T18:33:28.788Z",
+  "pushError": null,
   "tickers": {
     "AMD": {
-      "price": 559.74,
+      "price": 571.87,
       "currency": "USD",
-      "prevClose": 534.74,
-      "changePct": 4.68,
+      "prevClose": 560.26,
+      "changePct": 2.07,
       "market": "US",
-      "source": "Yahoo Finance",
-      "quoteTime": "2026-10-27T18:27:52.000Z",
-      "checkedAt": "2026-10-27T18:27:43.882Z",
+      "source": "CNBC",
+      "quoteTime": null,
+      "checkedAt": "2026-10-28T18:33:28.788Z",
       "error": null,
       "history": [
         {
@@ -52,18 +52,22 @@
         {
           "t": "2026-10-27T18:27:43.882Z",
           "p": 559.74
+        },
+        {
+          "t": "2026-10-28T18:33:28.788Z",
+          "p": 571.87
         }
       ]
     },
     "VOO": {
-      "price": 707,
+      "price": 709.12,
       "currency": "USD",
-      "prevClose": 703.41,
-      "changePct": 0.51,
+      "prevClose": 707.52,
+      "changePct": 0.23,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-10-27T18:27:43.882Z",
+      "checkedAt": "2026-10-28T18:33:28.788Z",
       "error": null,
       "history": [
         {
@@ -97,9 +101,13 @@
         {
           "t": "2026-10-27T18:27:43.882Z",
           "p": 707
+        },
+        {
+          "t": "2026-10-28T18:33:28.788Z",
+          "p": 709.12
         }
       ]
     }
   },
-  "state": "5c926Q+I7Duc4TZy+IdLulqYM6cVI6p5/o6ZoZefRT4UnwLr6yp8xzfC5NmMrb8gQw7ALGGzsvH1fPw9z4Kr0JmmyJ7YjQNw951W1IkYgHkhJYAjL+yIy/HNOAitKn9HRXncEk8qDYqDPPEqShrfiigiddXCDqoOha4w6ZNdDpYaX87QAvAXK9kkokoDCqB3R8/okITU7jetBo1zH7xheZK6nyD0BeEt"
+  "state": "QM0QdI6nIW2AkCQBLfBarBYo01NY9X/Bw224I8CAapsEg9V57m4exfcYSQt/D0tfhRJlhIacTFsqSxeb4l8uN94mcrZP0JdpATaUeQXZ1fRQ+nBMYnSG+qaTiFZwo0uS/YEi4XyQ+IId0s+qsvNEOf5l5ZnRwxX03Y1ve8OJK4EpFNC4uREpRh6708Lct4SC5dbNxzPW1usNiFoI7/alq7NwYhZLPo7H"
 }
