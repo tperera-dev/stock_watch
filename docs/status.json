@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-11-10T20:04:26.749Z",
-  "pushError": null,
+  "updatedAt": "2026-11-11T19:54:38.482Z",
+  "pushError": "Your phone's alert registration expired. Open the app and tap Enable alerts again.",
   "tickers": {
     "AMD": {
-      "price": 514.82,
+      "price": 560.09,
       "currency": "USD",
-      "prevClose": 508.58,
-      "changePct": 1.23,
+      "prevClose": 515.21,
+      "changePct": 8.71,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-10T20:04:26.749Z",
+      "checkedAt": "2026-11-11T19:54:38.482Z",
       "error": null,
       "history": [
         {
@@ -84,18 +84,22 @@
         {
           "t": "2026-11-10T20:04:26.749Z",
           "p": 514.82
+        },
+        {
+          "t": "2026-11-11T19:54:38.482Z",
+          "p": 560.09
         }
       ]
     },
     "VOO": {
-      "price": 687.64,
+      "price": 699.28,
       "currency": "USD",
-      "prevClose": 691.87,
-      "changePct": -0.61,
+      "prevClose": 689.5,
+      "changePct": 1.42,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-10T20:04:26.749Z",
+      "checkedAt": "2026-11-11T19:54:38.482Z",
       "error": null,
       "history": [
         {
@@ -161,9 +165,13 @@
         {
           "t": "2026-11-10T20:04:26.749Z",
           "p": 687.64
+        },
+        {
+          "t": "2026-11-11T19:54:38.482Z",
+          "p": 699.28
         }
       ]
     }
   },
-  "state": "LHKGWik7yiauwS2bgieW0Aqm5M1oSKBx/zM5O9PDqwlCv23BNSciSe05MShC6fx7VsGlrhAjZwH00JsCe3uE4dUz2159WTtYLuSwTJ0AycdsTtEpKNl2cqYqj0xL5GQMHerwQOqZg9FqE0jYiH6BRv60mMVgRPo1luCe8UhS+PI8O3vJEY4gP74XDxccSms6tlkGVO9fk/hoedS5eFuzoYCxyaKEKHBunQ=="
+  "state": "dD0ECQhghmlsoWotPO5Z36QRCp3E6NvCHxzB5mPcrHKPL7igFZA1wenoLTawL6BbyOnVM0gxOO/KBV4Tq6NjpD84zW2aH8DT20ZwGo6Ai+Zzc2mZxu7dp+zd0kHwZp75AEY1fg9d4LfKnICwJUAswAt3FFXYBsJIAahJ/N67WtmHcOKo9NJR1BpUfwQhM5GIj/IipV4KeIXmXa4sWSvqcO/mrz3ngn6y"
 }
