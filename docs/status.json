@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-11-19T14:35:49.106Z",
-  "pushError": null,
+  "updatedAt": "2026-11-19T21:03:37.511Z",
+  "pushError": "Your phone's alert registration expired. Open the app and tap Enable alerts again.",
   "tickers": {
     "AMD": {
-      "price": 548.07,
+      "price": 489.19,
       "currency": "USD",
-      "prevClose": 530.14,
-      "changePct": 3.38,
+      "prevClose": 585.3,
+      "changePct": -16.42,
       "market": "US",
-      "source": "CNBC",
-      "quoteTime": null,
-      "checkedAt": "2026-11-19T14:35:49.106Z",
+      "source": "Yahoo Finance",
+      "quoteTime": "2026-11-19T21:00:01.000Z",
+      "checkedAt": "2026-11-19T21:03:37.511Z",
       "error": null,
       "history": [
         {
@@ -104,18 +104,22 @@
         {
           "t": "2026-11-19T14:35:49.106Z",
           "p": 548.07
+        },
+        {
+          "t": "2026-11-19T21:03:37.511Z",
+          "p": 489.19
         }
       ]
     },
     "VOO": {
-      "price": 679.07,
+      "price": 657.95,
       "currency": "USD",
       "prevClose": 671.31,
-      "changePct": 1.16,
+      "changePct": -1.99,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-19T14:35:49.106Z",
+      "checkedAt": "2026-11-19T21:03:37.511Z",
       "error": null,
       "history": [
         {
@@ -205,9 +209,13 @@
         {
           "t": "2026-11-19T14:35:49.106Z",
           "p": 679.07
+        },
+        {
+          "t": "2026-11-19T21:03:37.511Z",
+          "p": 657.95
         }
       ]
     }
   },
-  "state": "pfdMKSvb0npp396YfbMFkGTOW51myUHp7f+oAzAbwkmeg9fWVDCcyJ6oTV3H4v7zP2Q+NTLsGolaRx0+3XwCCw7tgg6GlP6/SSpvufYadiFvqnlSMQlNASf1jyYS6PfR1ONPhTIJ5KH7YlUQud2W0ZS+yljGGfN14Bu0fvmTMGTaecz4mmtZihcxCtCH8pmyuzupopiHL5yvg8vssgnleSIO6LRk+9/QMA=="
+  "state": "WgTsZhRyzT9Borw9pfgNkWUsNDjD8PMpns1xZXPiU+1DbsVN5oeOAVAZjI6J215u+0WbRBR7yTYkbZZhzlzeowCwlv8mvC0BK4jBJVopwN/i1y/hduWMird0hGfmLHa8NTv7eD90jPztJVU1Jd1s8LnQlwzay4ts9evmGH1Trw3xE8r5Y/CmgBdqaPHqnKcWjqqyNnW5p6DeZRRQFv22BJjk76akKE/2"
 }
