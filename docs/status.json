@@ -1,17 +1,17 @@
 {
-  "updatedAt": "2026-11-18T20:57:15.478Z",
+  "updatedAt": "2026-11-19T14:35:49.106Z",
   "pushError": null,
   "tickers": {
     "AMD": {
-      "price": 497.65,
+      "price": 548.07,
       "currency": "USD",
-      "prevClose": 515.21,
-      "changePct": -3.41,
+      "prevClose": 530.14,
+      "changePct": 3.38,
       "market": "US",
-      "source": "Yahoo Finance",
-      "quoteTime": "2026-11-17T15:34:11.000Z",
-      "checkedAt": "2026-11-18T20:57:15.478Z",
-      "error": "Couldn't get a price: Yahoo HTTP 429; fetch failed; Google: price not found",
+      "source": "CNBC",
+      "quoteTime": null,
+      "checkedAt": "2026-11-19T14:35:49.106Z",
+      "error": null,
       "history": [
         {
           "t": "2026-10-16T13:05:54.726Z",
@@ -100,18 +100,22 @@
         {
           "t": "2026-11-17T15:34:01.328Z",
           "p": 497.65
+        },
+        {
+          "t": "2026-11-19T14:35:49.106Z",
+          "p": 548.07
         }
       ]
     },
     "VOO": {
-      "price": 671.99,
+      "price": 679.07,
       "currency": "USD",
-      "prevClose": 673.19,
-      "changePct": -0.18,
+      "prevClose": 671.31,
+      "changePct": 1.16,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-18T20:57:15.478Z",
+      "checkedAt": "2026-11-19T14:35:49.106Z",
       "error": null,
       "history": [
         {
@@ -197,9 +201,13 @@
         {
           "t": "2026-11-18T20:57:15.478Z",
           "p": 671.99
+        },
+        {
+          "t": "2026-11-19T14:35:49.106Z",
+          "p": 679.07
         }
       ]
     }
   },
-  "state": "7wE2qLvVqjaYR8fN6PzPGuZXfOGx49Epf4eVbTXYSkqyOohM1oOTg22uw92aymOJShNnr3XL6+c+kkjBWkUyNRh7ajVkM+5G0ednySWeiEE+P9vSP2fohDD7jH/8lcq1IjtN7YSXfvD8J5aeBcxmW4/iwzFcCROXdQTvr38mpdwIY8vNAliTa5LS6oRgStKrw20LCrDg5V9AopEzrxVmvy58Tninvtz+"
+  "state": "pfdMKSvb0npp396YfbMFkGTOW51myUHp7f+oAzAbwkmeg9fWVDCcyJ6oTV3H4v7zP2Q+NTLsGolaRx0+3XwCCw7tgg6GlP6/SSpvufYadiFvqnlSMQlNASf1jyYS6PfR1ONPhTIJ5KH7YlUQud2W0ZS+yljGGfN14Bu0fvmTMGTaecz4mmtZihcxCtCH8pmyuzupopiHL5yvg8vssgnleSIO6LRk+9/QMA=="
 }
