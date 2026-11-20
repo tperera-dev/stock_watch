@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-11-19T21:03:37.511Z",
+  "updatedAt": "2026-11-20T20:49:34.518Z",
   "pushError": "Your phone's alert registration expired. Open the app and tap Enable alerts again.",
   "tickers": {
     "AMD": {
-      "price": 489.19,
+      "price": 428.465,
       "currency": "USD",
-      "prevClose": 585.3,
-      "changePct": -16.42,
+      "prevClose": 534.06,
+      "changePct": -19.77,
       "market": "US",
       "source": "Yahoo Finance",
-      "quoteTime": "2026-11-19T21:00:01.000Z",
-      "checkedAt": "2026-11-19T21:03:37.511Z",
+      "quoteTime": "2026-11-20T20:49:43.000Z",
+      "checkedAt": "2026-11-20T20:49:34.518Z",
       "error": null,
       "history": [
         {
@@ -108,18 +108,22 @@
         {
           "t": "2026-11-19T21:03:37.511Z",
           "p": 489.19
+        },
+        {
+          "t": "2026-11-20T20:49:34.518Z",
+          "p": 428.465
         }
       ]
     },
     "VOO": {
-      "price": 657.95,
+      "price": 636.88,
       "currency": "USD",
-      "prevClose": 671.31,
-      "changePct": -1.99,
+      "prevClose": 658.01,
+      "changePct": -3.21,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-19T21:03:37.511Z",
+      "checkedAt": "2026-11-20T20:49:34.518Z",
       "error": null,
       "history": [
         {
@@ -213,9 +217,13 @@
         {
           "t": "2026-11-19T21:03:37.511Z",
           "p": 657.95
+        },
+        {
+          "t": "2026-11-20T20:49:34.518Z",
+          "p": 636.88
         }
       ]
     }
   },
-  "state": "WgTsZhRyzT9Borw9pfgNkWUsNDjD8PMpns1xZXPiU+1DbsVN5oeOAVAZjI6J215u+0WbRBR7yTYkbZZhzlzeowCwlv8mvC0BK4jBJVopwN/i1y/hduWMird0hGfmLHa8NTv7eD90jPztJVU1Jd1s8LnQlwzay4ts9evmGH1Trw3xE8r5Y/CmgBdqaPHqnKcWjqqyNnW5p6DeZRRQFv22BJjk76akKE/2"
+  "state": "Bjg33pT43x2jjg7awcx6elFhDG/zqtSbh4V1jZ7hVYFG91hhb2InEq66K0ijwrWPGtVtKaOqORIdxyYjSR+zogATJbGnqC98UP6RNPZHVkkh8eRpIzrIU2QrDA+GhDaqyrdILLZJ22HVi2EMKDVsMGU5MDl1VqFYoWUV6HKNfg6CB+PGxqBT2O7Go3mJzYKWFO+xSLZdGpwP+PM4VcdzYkLij61y+2Q="
 }
