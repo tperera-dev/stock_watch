@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-11-20T20:49:34.518Z",
-  "pushError": "Your phone's alert registration expired. Open the app and tap Enable alerts again.",
+  "updatedAt": "2026-11-23T16:17:44.668Z",
+  "pushError": null,
   "tickers": {
     "AMD": {
-      "price": 428.465,
+      "price": 458.78,
       "currency": "USD",
-      "prevClose": 534.06,
-      "changePct": -19.77,
+      "prevClose": 424.39,
+      "changePct": 8.1,
       "market": "US",
-      "source": "Yahoo Finance",
-      "quoteTime": "2026-11-20T20:49:43.000Z",
-      "checkedAt": "2026-11-20T20:49:34.518Z",
+      "source": "CNBC",
+      "quoteTime": null,
+      "checkedAt": "2026-11-23T16:17:44.668Z",
       "error": null,
       "history": [
         {
@@ -112,18 +112,22 @@
         {
           "t": "2026-11-20T20:49:34.518Z",
           "p": 428.465
+        },
+        {
+          "t": "2026-11-23T16:17:44.668Z",
+          "p": 458.78
         }
       ]
     },
     "VOO": {
-      "price": 636.88,
+      "price": 665.65,
       "currency": "USD",
-      "prevClose": 658.01,
-      "changePct": -3.21,
+      "prevClose": 635.54,
+      "changePct": 4.74,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-20T20:49:34.518Z",
+      "checkedAt": "2026-11-23T16:17:44.668Z",
       "error": null,
       "history": [
         {
@@ -221,9 +225,13 @@
         {
           "t": "2026-11-20T20:49:34.518Z",
           "p": 636.88
+        },
+        {
+          "t": "2026-11-23T16:17:44.668Z",
+          "p": 665.65
         }
       ]
     }
   },
-  "state": "Bjg33pT43x2jjg7awcx6elFhDG/zqtSbh4V1jZ7hVYFG91hhb2InEq66K0ijwrWPGtVtKaOqORIdxyYjSR+zogATJbGnqC98UP6RNPZHVkkh8eRpIzrIU2QrDA+GhDaqyrdILLZJ22HVi2EMKDVsMGU5MDl1VqFYoWUV6HKNfg6CB+PGxqBT2O7Go3mJzYKWFO+xSLZdGpwP+PM4VcdzYkLij61y+2Q="
+  "state": "b1E0+SUT56A9Jqo2jhw0ZPhB21J9NqWeEb65tnYiEeYWoYgcMw4lq1dF1H+2gaZeZ10flxar10fnIvQYNejJYVCWWgpkiR5mBeCBjOwVQCfT1wLnLhNQkdmyEhLOEEa13+qzILZmSqlHjtvOHfEzwpCR1jg6Zdmf8N4LhAOkrC2z7xTkxRvPeGZj8A+Vi5MtuPdWOZ5wT7L9xat7br03lLI7i3CWS9wi"
 }
