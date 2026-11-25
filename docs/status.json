@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-11-23T16:17:44.668Z",
+  "updatedAt": "2026-11-25T17:28:35.838Z",
   "pushError": null,
   "tickers": {
     "AMD": {
-      "price": 458.78,
+      "price": 384.55,
       "currency": "USD",
-      "prevClose": 424.39,
-      "changePct": 8.1,
+      "prevClose": 413.27,
+      "changePct": -6.95,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-23T16:17:44.668Z",
+      "checkedAt": "2026-11-25T17:28:35.838Z",
       "error": null,
       "history": [
         {
@@ -116,18 +116,22 @@
         {
           "t": "2026-11-23T16:17:44.668Z",
           "p": 458.78
+        },
+        {
+          "t": "2026-11-25T17:28:35.838Z",
+          "p": 384.55
         }
       ]
     },
     "VOO": {
-      "price": 665.65,
+      "price": 650.02,
       "currency": "USD",
-      "prevClose": 635.54,
-      "changePct": 4.74,
+      "prevClose": 660.71,
+      "changePct": -1.62,
       "market": "US",
       "source": "CNBC",
       "quoteTime": null,
-      "checkedAt": "2026-11-23T16:17:44.668Z",
+      "checkedAt": "2026-11-25T17:28:35.838Z",
       "error": null,
       "history": [
         {
@@ -229,9 +233,13 @@
         {
           "t": "2026-11-23T16:17:44.668Z",
           "p": 665.65
+        },
+        {
+          "t": "2026-11-25T17:28:35.838Z",
+          "p": 650.02
         }
       ]
     }
   },
-  "state": "b1E0+SUT56A9Jqo2jhw0ZPhB21J9NqWeEb65tnYiEeYWoYgcMw4lq1dF1H+2gaZeZ10flxar10fnIvQYNejJYVCWWgpkiR5mBeCBjOwVQCfT1wLnLhNQkdmyEhLOEEa13+qzILZmSqlHjtvOHfEzwpCR1jg6Zdmf8N4LhAOkrC2z7xTkxRvPeGZj8A+Vi5MtuPdWOZ5wT7L9xat7br03lLI7i3CWS9wi"
+  "state": "W9jexHDMhpwKzClYsU7YF0hL3ICJD548so7ezBBgRyQEaDxmSSNngOl0KGAapcfpKa+Y8Nt39sQJKM7cszM1Jg+T7KR1Z9eg8SWxjNiQOtzCWFSAUEeLwR8BF0scMd48F67oxgjVyRXPvmG3v7qmqEfiaVn1XdVJnijD68GqVflrCD/FsOr084Wu0kbFHxIWkFnY8F8ZItME47ztli1pjXXMyRrCdFDW"
 }
